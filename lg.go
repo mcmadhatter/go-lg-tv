@@ -21,7 +21,7 @@ type TV struct {
 	Name            string
 	Ip              net.IP
 	Found           bool
-	Pin             int
+	Pin             string
 }
 
 type LG_TV_COMMAND int
@@ -141,9 +141,10 @@ func (tv *TV) GetTVToShowPin() {
 
 //PairWithPin pair with the specified pin, using the pin in tv config
 func (tv *TV) PairWithPin() {
-	fmt.Println("Pairing with TV: " + tv.Name + " using Pin: " + strconv.Itoa(tv.Pin))
 
-	tv.SendHttpReqToLGTV("/udap/api/pairing", "<?xml version=\"1.0\" encoding=\"utf-8\"?><envelope><api type=\"pairing\"><name>hello</name><value>"+strconv.Itoa(tv.Pin)+"</value><port>8080</port></api></envelope>")
+	fmt.Println("Pairing with TV: " + tv.Name + " using Pin: " + tv.Pin)
+
+	tv.SendHttpReqToLGTV("/udap/api/pairing", "<?xml version=\"1.0\" encoding=\"utf-8\"?><envelope><api type=\"pairing\"><name>hello</name><value>"+tv.Pin+"</value><port>8080</port></api></envelope>")
 }
 
 //SendCommandCode sends a command to the tv
@@ -231,6 +232,7 @@ func prepareSockets() {
 		fmt.Println("Listen:", err)
 		os.Exit(1)
 	}
+	socketsUp = true
 }
 
 func (tv *TV) checkForMessages() (bool, error) { // Now we're checking for messages
@@ -272,7 +274,7 @@ func (tv *TV) handleMessage(message string, addr *net.UDPAddr) (bool, error) {
 			tv.Name = tvNames[1]
 			tv.Found = true
 			tv.Ip = addr.IP
-			fmt.Printf("TV Name is is %s, IPddress is:%s\n", tv.Name, tv.Ip.String())
+			fmt.Println("TV Name is " + tv.Name + " IP address is " + tv.Ip.String())
 			tv.pairingRequestPin()
 
 		}
